@@ -1,0 +1,109 @@
+name: Sync pinned G9650 reference source projects
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "local_manifests/lineage-20-reference.xml"
+      - ".github/workflows/sync-reference-sources.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync-reference-projects:
+    name: Fetch pinned device source projects
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout project metadata
+        uses: actions/checkout@v4
+
+      - name: Verify the LineageOS 20.0 platform manifest branch exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          git ls-remote --exit-code https://github.com/LineageOS/android.git refs/heads/lineage-20.0
+          echo "The LineageOS lineage-20.0 manifest branch exists."
+
+      - name: Fetch each pinned source project at its exact commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          report="$RUNNER_TEMP/reference-source-sync-report.md"
+          source_root="$RUNNER_TEMP/g9650-reference-sources"
+          mkdir -p "$source_root"
+          {
+            echo "# G9650 pinned source-project sync report"
+            echo
+            echo "- Date (UTC): $(date -u +%FT%TZ)"
+            echo "- Scope: only the five device-specific/reference projects pinned in the local manifest."
+            echo "- This job does **not** download the full Android/LineageOS platform source tree."
+            echo
+            echo "| Path | Repository | Requested commit | Checked-out commit | Result |"
+            echo "|---|---|---|---|---|"
+          } > "$report"
+
+          while IFS=$'\t' read -r name path revision; do
+            [ -n "$name" ] || continue
+            dest="$source_root/${path//\//__}"
+            mkdir -p "$dest"
+            git -C "$dest" init -q
+            git -C "$dest" remote add origin "https://github.com/$name.git"
+            echo "Fetching $name@$revision ..."
+            git -C "$dest" fetch --quiet --depth=1 origin "$revision"
+            git -C "$dest" checkout --quiet --detach FETCH_HEAD
+            actual="$(git -C "$dest" rev-parse HEAD)"
+            if [ "$actual" != "$revision" ]; then
+              echo "::error::Commit mismatch for $name: expected $revision, got $actual"
+              exit 1
+            fi
+            printf '| %s | [%s](https://github.com/%s) | `%s` | `%s` | PASS |\n' "$path" "$name" "$name" "$revision" "$actual" >> "$report"
+          done < <(python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("local_manifests/lineage-20-reference.xml").getroot()
+          for p in root.findall("project"):
+              print("\t".join((p.attrib["name"], p.attrib["path"], p.attrib["revision"])))
+          PY
+          )
+
+          echo >> "$report"
+          echo "All pinned repositories were fetched at the exact requested commits." >> "$report"
+
+          device="$source_root/device__samsung__star2qltechn"
+          common="$source_root/device__samsung__sdm845-common"
+          kernel="$source_root/kernel__samsung__sdm845"
+          vendor="$source_root/vendor__samsung__sdm845-common"
+
+          grep -Fq 'PRODUCT_DEVICE := star2qltechn' "$device/lineage_star2qltechn.mk"
+          grep -Fq 'PRODUCT_MODEL := SM-G9650' "$device/lineage_star2qltechn.mk"
+          grep -Fq 'lineage_star2qltechn_defconfig' "$device/BoardConfig.mk"
+          test -f "$kernel/arch/arm64/configs/lineage_star2qltechn_defconfig"
+          grep -Fq 'star2qltechn' "$common/Android.mk"
+          grep -Fq 'star2qltechn' "$vendor/Android.mk"
+
+          {
+            echo
+            echo "## Device identity and integration checks"
+            echo
+            echo "- PASS: product declares `PRODUCT_DEVICE := star2qltechn`."
+            echo "- PASS: product declares `PRODUCT_MODEL := SM-G9650`."
+            echo "- PASS: device board config selects `lineage_star2qltechn_defconfig`."
+            echo "- PASS: the selected kernel commit contains that defconfig."
+            echo "- PASS: chosen common tree and vendor build filters contain `star2qltechn`."
+            echo
+            echo "## Scope limitation"
+            echo
+            echo "This validates fetchability, exact revisions, and basic product-tree consistency. It is not a full LineageOS `repo sync`, does not run `lunch`, and does not compile a ROM. The full platform checkout requires a runner with substantially more disk space than the standard GitHub-hosted runner."
+          } >> "$report"
+
+          cat "$report"
+
+      - name: Upload source sync report
+        uses: actions/upload-artifact@v4
+        with:
+          name: g9650-reference-source-sync-report
+          path: ${{ runner.temp }}/reference-source-sync-report.md
+          if-no-files-found: error
+          retention-days: 14
