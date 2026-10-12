@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   validate:
-    name: Validate docs, source manifest, and repository safety
+    name: Validate docs, pinned manifest, and repository safety
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
@@ -27,6 +27,7 @@ jobs:
           test -s docs/lineage-19.1-source-audit.md
           test -s docs/known-good-rom-reference.md
           test -s docs/reference-source-set.md
+          test -s docs/android-16-gap-analysis.md
           test -s docs/roadmap.md
           test -s docs/test-plan.md
           test -s local_manifests/README.md
@@ -72,6 +73,50 @@ jobs:
                   raise SystemExit(f"Project revision is not a pinned SHA: {name} {revision!r}")
 
           print(f"Valid XML: {len(projects)} projects; all revisions pinned to full commit SHAs.")
+          PY
+
+      - name: Verify all pinned source commits exist upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import time
+          import urllib.error
+          import urllib.request
+          import xml.etree.ElementTree as ET
+
+          root = ET.parse("local_manifests/lineage-20-reference.xml").getroot()
+          for project in root.findall("project"):
+              owner_repo = project["name"]
+              revision = project["revision"]
+              url = f"https://api.github.com/repos/{owner_repo}/commits/{revision}"
+              request = urllib.request.Request(
+                  url,
+                  headers={
+                      "Accept": "application/vnd.github+json",
+                      "User-Agent": "G9650-Android16-manifest-validation",
+                  },
+              )
+              for attempt in range(3):
+                  try:
+                      with urllib.request.urlopen(request, timeout=30) as response:
+                          result = json.load(response)
+                      actual = result.get("sha", "")
+                      if actual.lower() != revision.lower():
+                          raise SystemExit(f"SHA mismatch for {owner_repo}: {actual} != {revision}")
+                      print(f"OK {owner_repo} {revision}")
+                      break
+                  except urllib.error.HTTPError as error:
+                      if error.code == 403 and attempt < 2:
+                          time.sleep(5 * (attempt + 1))
+                          continue
+                      raise SystemExit(f"Cannot verify {owner_repo}@{revision}: HTTP {error.code}") from error
+                  except urllib.error.URLError as error:
+                      if attempt < 2:
+                          time.sleep(3 * (attempt + 1))
+                          continue
+                      raise SystemExit(f"Network failure for {owner_repo}@{revision}: {error}") from error
           PY
 
       - name: Verify no accidental ROM binaries or archives are tracked
