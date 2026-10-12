@@ -1,68 +1,49 @@
 # G9650 Android 16
 
-Android 16 / LineageOS porting project for Samsung Galaxy S9+ Snapdragon variant:
+Community porting project targeting Android 16 / LineageOS for the Samsung Galaxy S9+ Snapdragon variant.
 
 - **Device:** Samsung Galaxy S9+ SM-G9650
 - **Device codename:** `star2qltechn`
 - **Platform:** Qualcomm Snapdragon 845 (SDM845)
-- **Goal:** Build a maintainable Android 16 ROM and validate real-device functionality, not merely achieve a successful compile or boot.
+- **Android 16 target branch:** LineageOS `lineage-23.2`
+- **Goal:** A reproducible, maintainable ROM validated on real hardware—not merely a successful compile or first boot.
 
-> **Status:** Initial project scaffold. No Android 16 build has been verified from this repository yet.
+> **Current status:** Source reconnaissance and reference manifest are in progress. No Android 16 image has been built or verified by this repository.
 
 ## Development strategy
 
-1. **Re-establish the known-good baseline.** Locate and pin the exact LineageOS 19.1 ROM/build and matching device tree, common tree, kernel, vendor files, firmware, and recovery used for the previous G9650 test.
-2. **Document the current device state.** Record bootloader/firmware versions, partition layout, recovery version, and backup/recovery path before any experimental flash.
-3. **Audit source compatibility.** Compare the 19.1 base against newer community SDM845/Samsung sources. Do not assume that an Android 13-era device tree or kernel can be reused unchanged for Android 16.
-4. **Prepare reproducible build configuration.** Keep manifests, patches, scripts, and CI configuration here; do not commit the full Android source tree or proprietary firmware blobs.
-5. **Compile incrementally.** First validate repository sync and manifest resolution, then device configuration, kernel integration, image generation, and finally boot/functional testing.
-6. **Validate on hardware.** Maintain a test log for boot, telephony/RIL, LTE registration, Bluetooth, Wi-Fi, audio, camera, sensors, GPS, charging, sleep/wake, encryption, and recovery.
+1. **Use the published LineageOS 19.1 release as a historical behavior reference.** The exact-S9+ asset and caveats are documented in [known-rom reference](docs/known-good-rom-reference.md).
+2. **Lock a coherent intermediate source set.** A pinned LineageOS 20 / Android 13 reference manifest has been added to help validate the device-specific tree, common tree, kernel and vendor integration. This is an integration checkpoint only, not the final Android 16 target.
+3. **Create the Android 16 port.** Start from LineageOS `lineage-23.2`, adapt the SDM845/Samsung sources and resolve build, VINTF, SELinux, init, radio, kernel, vendor/HAL and image-packaging issues.
+4. **Build reproducibly.** Keep small local manifests, patch sets, automation and logs here; do not commit the full Android source tree or proprietary firmware blobs.
+5. **Validate on hardware.** Track boot, telephony/RIL, network registration, Bluetooth, Wi-Fi, audio, camera, sensors, GPS, charging, sleep/wake, encryption and recovery.
 
-## Known test observations from the previous session
+## Current documents
 
-These are user-reported observations and must be reproduced against a pinned build before being treated as confirmed project status:
+- [Roadmap and milestone gates](docs/roadmap.md)
+- [LineageOS 19.1 source audit](docs/lineage-19.1-source-audit.md)
+- [Published LineageOS 19.1 reference image](docs/known-good-rom-reference.md)
+- [Pinned LineageOS 20 reference source set](docs/reference-source-set.md)
+- [Device/common/kernel/vendor compatibility audit](docs/compatibility.md)
+- [Baseline capture checklist](docs/baseline.md)
+- [Hardware validation plan](docs/test-plan.md)
+- [Reference manifest XML](local_manifests/lineage-20-reference.xml)
 
-- LineageOS 19.1 was tested on the G9650.
+## Prior device observations
+
+These are user-reported observations from an earlier LineageOS 19.1 setup and must be reproduced against an exact, pinned build before being treated as confirmed project-wide issues:
+
 - SIM/network registration was unreliable in the default network mode; LTE-only mode could register on China Unicom.
-- Bluetooth was reported unavailable on one LineageOS 19.1 setup.
+- Bluetooth was reported unavailable on one setup.
 
-The exact build fingerprint, ZIP filename/hash, firmware version, logs, and test conditions still need to be recorded. Do not infer that every LineageOS 19.1 build has these same issues.
+The exact ROM ZIP, SHA-256, build fingerprint, firmware/baseband and diagnostic logs should be captured where available. Do not infer that all builds have the same issues.
 
-## Repository layout (planned)
+## Build infrastructure
 
-```text
-.
-├── README.md
-├── docs/
-│   ├── baseline.md          # Exact reference build and firmware
-│   ├── compatibility.md     # Device-tree/kernel/vendor audit
-│   ├── test-plan.md         # Hardware test checklist
-│   └── build-notes.md       # Reproducible build notes
-├── local_manifests/
-│   └── README.md            # Planned repo manifest overlays
-├── patches/
-│   └── README.md            # Tracked source patches only
-└── .github/
-    └── workflows/
-        └── validate-config.yml
-```
+GitHub Actions is currently for configuration validation. A full Android source build requires far more storage and memory than a standard GitHub-hosted runner provides. Before enabling a full build, choose a supported larger runner or a secured cloud self-hosted runner and confirm resource needs and costs.
 
-## Build infrastructure notes
-
-GitHub Actions can validate the repository configuration and coordinate builds. A full Android build needs substantially more disk and memory than a standard GitHub-hosted runner provides. Before enabling a full build, choose a supported larger runner or a secured cloud self-hosted runner and confirm storage, build time, artifact retention, and cost.
-
-Never put access tokens, signing keys, private credentials, or proprietary firmware in the repository or build logs.
+Never expose a self-hosted runner to untrusted pull requests. Never commit access tokens, signing keys, private credentials, or proprietary blobs without clear redistribution permission.
 
 ## Definition of done
 
-A candidate is not considered daily-use-ready until it has:
-
-- A reproducible build tied to a documented source revision.
-- A bootable image and a verified way to recover the device if boot fails.
-- Successful basic hardware tests, with known limitations clearly documented.
-- No unresolved critical failures in telephony, connectivity, charging, or sleep/wake.
-- Published checksums and build/test notes for each release.
-
-## Next actions
-
-See [baseline.md](docs/baseline.md), [compatibility.md](docs/compatibility.md), and [test-plan.md](docs/test-plan.md) as they are added.
+A build is not considered daily-use-ready until it has a reproducible source revision, bootable and recoverable images, documented checksums, a completed hardware-test report, and no unresolved critical faults in telephony, connectivity, charging, or sleep/wake.
