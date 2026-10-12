@@ -44,7 +44,7 @@ This is an informed integration choice, **not yet a proven working build**. The 
 Use a disposable workspace with enough free disk space. The base manifest and local projects must all target the LineageOS 20 branch:
 
 ```bash
-repo init -u https://github.com/LineageOS/android.git -b lineage-20 --git-lfs --no-clone-bundle
+repo init -u https://github.com/LineageOS/android.git -b lineage-20.0 --git-lfs --no-clone-bundle
 mkdir -p .repo/local_manifests
 cp /path/to/lineage-20-reference.xml .repo/local_manifests/
 repo sync -c --no-clone-bundle --no-tags --optimized-fetch --prune -j8
