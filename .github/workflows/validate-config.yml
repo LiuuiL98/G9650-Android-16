@@ -88,8 +88,8 @@ jobs:
 
           root = ET.parse("local_manifests/lineage-20-reference.xml").getroot()
           for project in root.findall("project"):
-              owner_repo = project["name"]
-              revision = project["revision"]
+              owner_repo = project.attrib["name"]
+              revision = project.attrib["revision"]
               url = f"https://api.github.com/repos/{owner_repo}/commits/{revision}"
               request = urllib.request.Request(
                   url,
