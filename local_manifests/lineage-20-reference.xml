@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Historical reference integration set for SM-G9650 (star2qltechn).
-  Target: LineageOS 20 / Android 13 only.
-  These SHA pins are for reproducibility, not a claim of successful build.
-  Do NOT use this manifest to build the Android 16 target.
-  To use for an isolated reference checkout, initialize repo with
-  the matching LineageOS branch and copy this file into .repo/local_manifests/.
+  Provisional historical reference integration set for SM-G9650 (star2qltechn).
+  Target: LineageOS 20 / Android 13 only. Not the Android 16 manifest.
+  IMPORTANT: The exact device tree's lineage.dependencies points to the older
+  sdm845-samsung common tree whose Android.mk filter omits the "techn" names.
+  This manifest intentionally overrides that dependency with the
+  sdm845-samsung-dev common tree, whose filter includes star2qltechn.
+  The checkout/build must confirm this override is honored.
+  To use in an isolated reference checkout, initialize LineageOS lineage-20
+  then copy this file into .repo/local_manifests/.
 -->
 <manifest>
     <project name="sdm845-samsung-dev/android_device_samsung_star2qltechn"
