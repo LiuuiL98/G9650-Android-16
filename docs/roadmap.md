@@ -31,7 +31,7 @@ Target LineageOS branch: `lineage-23.2` (Android 16). A matching public G9650-sp
 
 ### M1 — Reference source lock (current milestone)
 
-Use the pinned LineageOS 20 sources in [lineage-20-reference.xml](../local_manifests/lineage-20-reference.xml) as an integration checkpoint. The XML explicitly overrides a stale common-tree dependency from the exact-device tree; this must be verified by the actual checkout and build tools. The 2022 release image is a behavior reference, not proof that these 2023 source commits recreate the release build.
+Use the pinned LineageOS `lineage-20.0` sources in [lineage-20-reference.xml](../local_manifests/lineage-20-reference.xml) as an integration checkpoint. The XML explicitly overrides a stale common-tree dependency from the exact-device tree; this must be verified by the actual checkout and build tools. The 2022 release image is a behavior reference, not proof that these 2023 source commits recreate the release build.
 
 **Acceptance gate:**
 - All pinned projects clone/fetch successfully.
