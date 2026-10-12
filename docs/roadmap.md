@@ -15,7 +15,8 @@ Target LineageOS branch: `lineage-23.2` (Android 16). A matching public G9650-sp
 - [x] Identified the published community LineageOS 19.1 asset for `star2qltechn`.
 - [x] Pinned a candidate LineageOS 20 reference source set for an integration checkpoint.
 - [x] Recorded the stale `lineage.dependencies` mismatch and the deliberate common-tree override in [reference-source-set.md](reference-source-set.md).
-- [ ] Verify the reference manifest by syncing a LineageOS 20 tree.
+- [x] Fetch and verify the five pinned device/reference projects at their exact commits; see [source-sync-results.md](source-sync-results.md).
+- [ ] Run a full LineageOS `repo sync` on a runner with enough disk space.
 - [ ] Confirm the expected lunch target resolves and the ROM builds, or document the first genuine blocker.
 - [ ] Reconcile vendor blobs, firmware provenance, and redistribution constraints.
 - [ ] Create a dedicated Android 16 port branch and manifest.
@@ -34,7 +35,7 @@ Target LineageOS branch: `lineage-23.2` (Android 16). A matching public G9650-sp
 Use the pinned LineageOS `lineage-20.0` sources in [lineage-20-reference.xml](../local_manifests/lineage-20-reference.xml) as an integration checkpoint. The XML explicitly overrides a stale common-tree dependency from the exact-device tree; this must be verified by the actual checkout and build tools. The 2022 release image is a behavior reference, not proof that these 2023 source commits recreate the release build.
 
 **Acceptance gate:**
-- All pinned projects clone/fetch successfully.
+- All pinned projects clone/fetch successfully. (The five-project fetch check passed; full platform sync is still pending.)
 - `repo sync` completes without missing projects.
 - The final checked-out common tree is the intended `sdm845-samsung-dev` revision, not an auto-fetched older fork.
 - `lineage_star2qltechn-userdebug` is recognized.
