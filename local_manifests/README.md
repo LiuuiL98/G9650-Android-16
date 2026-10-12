@@ -1,12 +1,17 @@
-# Local manifest staging
+# Local manifest files
 
-This directory is reserved for small, reviewable repo manifest overlays used by the Android source checkout.
+This directory stores small, reviewable repo manifest overlays for source sets.
 
-Before adding `roomservice.xml` or other manifest files:
-1. Confirm each repository URL and branch exists.
-2. Pin critical repositories to compatible branches or commit revisions when appropriate.
-3. Check whether the selected Android manifest already includes any dependency, to avoid duplicate project paths.
-4. Keep proprietary binaries out of this repository unless redistribution is explicitly permitted.
-5. Run `repo sync` validation in the build environment before attempting a ROM build.
+## Available manifest
 
-No target manifest is committed yet because the exact Android 16-compatible device/common/kernel source revisions still need to be verified.
+- `lineage-20-reference.xml`: a pinned historical LineageOS 20 / Android 13 integration checkpoint. It is **not** the Android 16 target manifest. Initialize the matching LineageOS branch before using it; instructions and commit details are in [reference-source-set.md](../docs/reference-source-set.md).
+
+## Rules
+
+1. Verify every repository, ref and dependency before adding or updating a manifest.
+2. Keep source sets branch-compatible; do not mix repositories just because they share the SDM845 name.
+3. Pin revisions when reproducing a historical build.
+4. Do not commit proprietary files unless redistribution is explicitly permitted.
+5. Validate XML and run `repo sync` in a disposable build workspace before attempting a full compile.
+
+The Android 16 / LineageOS `lineage-23.2` manifest has not been committed yet because the exact-device source compatibility has not been verified.
