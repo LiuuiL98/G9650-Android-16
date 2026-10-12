@@ -11,11 +11,12 @@ permissions:
 
 jobs:
   validate:
-    name: Validate documentation and manifest placeholders
+    name: Validate docs, source manifest, and repository safety
     runs-on: ubuntu-latest
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
+
       - name: Check required project files
         shell: bash
         run: |
@@ -23,11 +24,57 @@ jobs:
           test -s README.md
           test -s docs/baseline.md
           test -s docs/compatibility.md
+          test -s docs/lineage-19.1-source-audit.md
+          test -s docs/known-good-rom-reference.md
+          test -s docs/reference-source-set.md
+          test -s docs/roadmap.md
           test -s docs/test-plan.md
           test -s local_manifests/README.md
+          test -s local_manifests/lineage-20-reference.xml
           test -s patches/README.md
-          echo "Project scaffold files are present."
-      - name: Verify no accidental large binary files are tracked
+          echo "Required project files are present."
+
+      - name: Validate reference manifest XML and pinned revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re
+          import xml.etree.ElementTree as ET
+
+          path = "local_manifests/lineage-20-reference.xml"
+          root = ET.parse(path).getroot()
+          if root.tag != "manifest":
+              raise SystemExit("Root element must be <manifest>")
+
+          expected = {
+              "device/samsung/star2qltechn",
+              "device/samsung/sdm845-common",
+              "hardware/samsung",
+              "kernel/samsung/sdm845",
+              "vendor/samsung/sdm845-common",
+          }
+          projects = root.findall("project")
+          paths = [p.attrib.get("path", "") for p in projects]
+          if set(paths) != expected:
+              raise SystemExit(f"Unexpected manifest paths: {paths!r}")
+          if len(paths) != len(set(paths)):
+              raise SystemExit("Duplicate project paths found.")
+
+          for project in projects:
+              name = project.attrib.get("name", "")
+              revision = project.attrib.get("revision", "")
+              remote = project.attrib.get("remote", "")
+              path = project.attrib.get("path", "")
+              if not name or not path or remote != "github":
+                  raise SystemExit(f"Missing name/path or invalid remote: {project.attrib!r}")
+              if not re.fullmatch(r"[0-9a-f]{40}", revision):
+                  raise SystemExit(f"Project revision is not a pinned SHA: {name} {revision!r}")
+
+          print(f"Valid XML: {len(projects)} projects; all revisions pinned to full commit SHAs.")
+          PY
+
+      - name: Verify no accidental ROM binaries or archives are tracked
         shell: bash
         run: |
           set -euo pipefail
