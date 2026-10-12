@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Historical reference integration set for SM-G9650 (star2qltechn).
+  Target: LineageOS 20 / Android 13 only.
+  These SHA pins are for reproducibility, not a claim of successful build.
+  Do NOT use this manifest to build the Android 16 target.
+  To use for an isolated reference checkout, initialize repo with
+  the matching LineageOS branch and copy this file into .repo/local_manifests/.
+-->
+<manifest>
+    <project name="sdm845-samsung-dev/android_device_samsung_star2qltechn"
+             path="device/samsung/star2qltechn"
+             remote="github"
+             revision="ba5bc312b8fd638093b7ac5a0604986342ed29d7" />
+    <project name="sdm845-samsung-dev/android_device_samsung_sdm845-common"
+             path="device/samsung/sdm845-common"
+             remote="github"
+             revision="c13b15e6392b4d15ae18d8d8ea64560f0ee02f88" />
+    <project name="LineageOS/android_hardware_samsung"
+             path="hardware/samsung"
+             remote="github"
+             revision="65fcb7bb55a35d6751bbe289fcba894fce39becf" />
+    <project name="sdm845-samsung-dev/android_kernel_samsung_sdm845"
+             path="kernel/samsung/sdm845"
+             remote="github"
+             revision="aa7f013da287f80642982f582f4035fbabd5fe89" />
+    <project name="sdm845-samsung-dev/android_vendor_samsung_sdm845-common"
+             path="vendor/samsung/sdm845-common"
+             remote="github"
+             revision="bef4f36124cebc85c12c8cab6e0279895c82f53e" />
+</manifest>
