@@ -1,0 +1,38 @@
+name: Validate project configuration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate documentation and manifest placeholders
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+      - name: Check required project files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s README.md
+          test -s docs/baseline.md
+          test -s docs/compatibility.md
+          test -s docs/test-plan.md
+          test -s local_manifests/README.md
+          test -s patches/README.md
+          echo "Project scaffold files are present."
+      - name: Verify no accidental large binary files are tracked
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find . -type f \( -iname '*.img' -o -iname '*.tar' -o -iname '*.tar.gz' -o -iname '*.zip' -o -iname '*.apk' \) -not -path './.git/*' | grep -q .; then
+            echo "::error::Unexpected binary archive/image found in project repository."
+            exit 1
+          fi
+          echo "No ROM images or archives are tracked in this project scaffold."
