@@ -1,50 +1,51 @@
-# LineageOS 19.1 source baseline audit (G9650 / star2qltechn)
+# G9650 LineageOS 19.1 baseline — revised audit
 
 Audit date: 2026-10-13
 
-This document records the community repositories supplied for the known Android 12L / LineageOS 19.1 port. It is an audit snapshot, not proof that these repositories build together or that all hardware features work on every G9650.
+## Critical correction: an exact G9650 device tree exists
 
-## Repository inventory
+The user initially supplied the S9 device-tree repository:
+- [CarlosJRay/Android_device_samsung_starqltechn, lineage-19.1](https://github.com/CarlosJRay/Android_device_samsung_starqltechn/tree/lineage-19.1) — its product file identifies `SM-G9600`, the Galaxy S9, not the target S9+.
 
-| Component | Repository / ref | Audit findings | Current classification |
+A separate exact device-specific repository has now been located:
+- [CarlosJRay/Android_device_samsung_star2qltechn, lineage-19.1](https://github.com/CarlosJRay/Android_device_samsung_star2qltechn/tree/lineage-19.1)
+- Branch commit: `06e450924ba754d141b1b8df04259931f175c30d`
+- `PRODUCT_DEVICE := star2qltechn`
+- `PRODUCT_MODEL := SM-G9650`
+- Product file: `lineage_star2qltechn.mk`
+- Kernel config: `star2qlte_chn_open_defconfig`
+- Device-specific `lineage.dependencies` points to `matebuteler/android_device_samsung_sdm845-common`.
+
+**This exact-device branch is the better starting point for recreating the LineageOS 19.1 baseline.** It still needs a full manifest/dependency and actual build verification; repository presence alone does not prove a successful ROM or fully working hardware.
+
+## Repositories and branches observed
+
+| Layer | Repository/ref | Revision or observed details | Status |
 |---|---|---|---|
-| Device-specific tree | [CarlosJRay/Android_device_samsung_starqltechn](https://github.com/CarlosJRay/Android_device_samsung_starqltechn/tree/lineage-19.1), branch `lineage-19.1`, commit `b04346a4590c0eee9bdc5d21dad32648eab660e9` | Product makefile identifies PRODUCT_DEVICE as `starqltechn`, model `SM-G9600`; BoardConfig selects `starqlte_chn_open_defconfig`. | **Important identity mismatch to verify** |
-| SDM845 common device tree | [CarlosJRay/android_device_samsung_sdm845-common](https://github.com/CarlosJRay/android_device_samsung_sdm845-common/tree/lineage-19.1), branch `lineage-19.1`, commit `e5e084a0b67fae28804c54f702a0522be038c721` | Explicit Android 12L / LineageOS 19.1 branch. Its `Android.mk` target filter includes `crownqltechn starqltechn star2qltechn`. `BoardConfigCommon.mk` targets SDM845 and Adreno 630, uses 64-bit primary and 32-bit secondary architecture settings, and legacy kernel/image values. | **Reference baseline only** |
-| Vendor common tree | [CarlosJRay/android_vendor_samsung_sdm845-common](https://github.com/CarlosJRay/android_vendor_samsung_sdm845-common), branch `main`, commit `55e1111e92f7aaa748c4f192a7da31a31ede273c` | Repo contains proprietary Samsung vendor components and generated build definitions. In the inspected `Android.mk`, a filter mentions `star2qlte starqlte`, not the `star2qltechn` codename exactly. | **Do not assume this branch matches the device tree** |
-| Kernel candidate | [Nyoutaaa/android_kernel_samsung_sdm845](https://github.com/Nyoutaaa/android_kernel_samsung_sdm845), branch `thirteen`, commit `a44036cfc48932ee1de3f55c021265bb141fb7f6` | Branch name suggests Android 13-era use, but this is not a confirmed match for the LineageOS 19.1 tree. The common tree's `lineage.dependencies` instead points to `ruizlenato/android_kernel_samsung_sdm845`. | **Alternative candidate; compatibility unproven** |
+| Exact S9+ device tree | [CarlosJRay/Android_device_samsung_star2qltechn](https://github.com/CarlosJRay/Android_device_samsung_star2qltechn/tree/lineage-19.1) `lineage-19.1` | `06e450924ba754d141b1b8df04259931f175c30d`; product = SM-G9650 / star2qltechn | **Best initial device-tree candidate** |
+| S9 device tree (not target) | [CarlosJRay/Android_device_samsung_starqltechn](https://github.com/CarlosJRay/Android_device_samsung_starqltechn/tree/lineage-19.1) `lineage-19.1` | `b04346a4590c0eee9bdc5d21dad32648eab660e9`; product = SM-G9600 / starqltechn | Use only to compare shared S9/S9+ deltas |
+| Shared device tree candidate A | [CarlosJRay/android_device_samsung_sdm845-common](https://github.com/CarlosJRay/android_device_samsung_sdm845-common/tree/lineage-19.1) `lineage-19.1` | `e5e084a0b67fae28804c54f702a0522be038c721`; accepts star2qltechn in makefile filter; dependencies use ruizlenato kernel and DotOS vendor `dot11` | Historical common-tree candidate, dependency source differs |
+| Shared device tree candidate B | [matebuteler/android_device_samsung_sdm845-common](https://github.com/matebuteler/android_device_samsung_sdm845-common) | Explicit dependency of the exact S9+ device tree; exact branch/commit must be checked before locking manifest | **Next item to verify** |
+| Vendor candidate supplied by user | [CarlosJRay/android_vendor_samsung_sdm845-common](https://github.com/CarlosJRay/android_vendor_samsung_sdm845-common) `main` | `55e1111e92f7aaa748c4f192a7da31a31ede273c`; not clearly shown as the exact S9+ baseline in the inspected build filter | Do not combine blindly |
+| Vendor required by common-tree dependency | [DotOS-Devices/proprietary_vendor_samsung_sdm845-common](https://github.com/DotOS-Devices/proprietary_vendor_samsung_sdm845-common), branch `dot11` | Explicit dependency in CarlosJRay common tree; proprietary files may have redistribution constraints | Historical dependency candidate |
+| Kernel candidate supplied by user | [Nyoutaaa/android_kernel_samsung_sdm845](https://github.com/Nyoutaaa/android_kernel_samsung_sdm845/tree/thirteen) `thirteen` | `a44036cfc48932ee1de3f55c021265bb141fb7f6`; Android 13-era branch label | Alternative candidate; not established as the 19.1 kernel |
+| Kernel required by common-tree dependency | `ruizlenato/android_kernel_samsung_sdm845` | Named by `CarlosJRay/android_device_samsung_sdm845-common/lineage-19.1/lineage.dependencies`; repository lookup was not resolvable in this audit environment | Need recover/resolve exact source URL and revision |
 
-## Critical device-name distinction
+## Dependency graph from the files inspected
 
-The supplied device tree is named `starqltechn`, and its product makefile sets model `SM-G9600`. Your phone is SM-G9650 / `star2qltechn`.
+```text
+device/samsung/star2qltechn
+  └── matebuteler/android_device_samsung_sdm845-common
+      └── must inspect its own dependencies before selecting kernel/vendor
 
-In Samsung Galaxy naming, `starqltechn` is associated with the S9 Snapdragon China/HK family and `star2qltechn` with the S9+ Snapdragon China/HK family. They share SDM845 components, but the phone-specific product configuration, display/panel, camera, sensors, partition layout, firmware, device assert, and kernel configuration must not be blindly reused. The common tree's filter includes `star2qltechn`, but that alone does not mean the supplied phone-specific `starqltechn` tree can build the S9+.
+Separate CarlosJRay common tree:
+device/samsung/sdm845-common (CarlosJRay, lineage-19.1)
+  ├── ruizlenato/android_kernel_samsung_sdm845
+  └── DotOS-Devices/proprietary_vendor_samsung_sdm845-common (dot11)
+```
 
-**Do not point `PRODUCT_DEVICE` at the G9600 tree and attempt to flash it on the G9650.**
+Do not assume the two shared device-tree candidates are interchangeable. Follow the dependency graph of the exact-device tree first, then compare against alternatives. Keep every selected repository's commit SHA in the project manifest notes.
 
-## Dependency conflict to resolve before a manifest is committed
+## Recommended next action
 
-The inspected `lineage.dependencies` in the supplied star device tree points to:
-
-- `dotOS-Devices/android_device_samsung_sdm845-common`
-
-The inspected common tree's `lineage.dependencies` points to:
-
-- `ruizlenato/android_kernel_samsung_sdm845`
-- `DotOS-Devices/proprietary_vendor_samsung_sdm845-common`, branch `dot11`
-
-This differs from the supplied CarlosJRay common tree, vendor tree and Nyoutaaa kernel. Therefore, the four links are useful evidence of related community work, but must not simply be combined into a manifest without checking dependency revisions and target compatibility.
-
-## Immediate follow-up investigation
-
-1. Find a **G9650 / star2qltechn-specific device tree** with an explicit 19.1 or later branch, preferably one whose product files identify `SM-G9650` and `PRODUCT_DEVICE := star2qltechn`.
-2. Inspect the actual full common-tree dependency manifest and kernel defconfig names.
-3. Compare the supplied vendor tree's build filters, device-specific blobs and licensing/redistribution implications before relying on it.
-4. Check which kernel repository and exact commit were used by the actual working ROM. A different branch named `thirteen` should not replace the known kernel without a source/build comparison.
-5. Only after dependencies are pinned, create a `local_manifests` XML and run `repo sync` in a build environment.
-6. Retain the known LineageOS 19.1 setup as a reference point for triaging radio and Bluetooth issues. Do not assume those reported issues are caused by any one of these repos until logs are available.
-
-## Current conclusion
-
-These links establish a useful historical SDM845 / LineageOS 19.1 reference. However, the named device tree is for `starqltechn` / SM-G9600, whereas the project target is `star2qltechn` / SM-G9650. It can inform the shared-platform analysis, but the correct S9+ device tree is still the first missing link. The vendor and kernel sources also need matching-revision verification.
-
-No proprietary vendor images or full source trees have been copied into this repository.
+Inspect [matebuteler/android_device_samsung_sdm845-common](https://github.com/matebuteler/android_device_samsung_sdm845-common), its branch and dependency file; then locate the exact kernel revision and vendor branch used with it. Only after that create the first `local_manifests/*.xml` for a reproducible 19.1 baseline. A separate Android 16 work branch can then be compared against it.
