@@ -13,7 +13,7 @@ Community porting project targeting Android 16 / LineageOS for the Samsung Galax
 ## Development strategy
 
 1. **Use the published LineageOS 19.1 release as a historical behavior reference.** The exact-S9+ asset and caveats are documented in [known-rom reference](docs/known-good-rom-reference.md).
-2. **Lock an intermediate source set.** A pinned LineageOS 20 / Android 13 reference manifest has been added. The exact-device tree's declared common-tree dependency is stale, so the manifest deliberately overrides it with a fork whose build filter includes `star2qltechn`; real sync/build validation is still required. This is an integration checkpoint only, not the final Android 16 target.
+2. **Lock an intermediate source set.** A pinned LineageOS `lineage-20.0` / Android 13 reference manifest has been added. The exact-device tree's declared common-tree dependency is stale, so the manifest deliberately overrides it with a fork whose build filter includes `star2qltechn`; real sync/build validation is still required. This is an integration checkpoint only, not the final Android 16 target.
 3. **Create the Android 16 port.** Start from LineageOS `lineage-23.2`, adapt the SDM845/Samsung sources and resolve build, VINTF, SELinux, init, radio, kernel, vendor/HAL and image-packaging issues.
 4. **Build reproducibly.** Keep small local manifests, patch sets, automation and logs here; do not commit the full Android source tree or proprietary firmware blobs.
 5. **Validate on hardware.** Track boot, telephony/RIL, network registration, Bluetooth, Wi-Fi, audio, camera, sensors, GPS, charging, sleep/wake, encryption and recovery.
