@@ -24,6 +24,7 @@ Community porting project targeting Android 16 / LineageOS for the Samsung Galax
 - [LineageOS 19.1 source audit](docs/lineage-19.1-source-audit.md)
 - [Published LineageOS 19.1 reference image](docs/known-good-rom-reference.md)
 - [Pinned LineageOS 20 reference source set](docs/reference-source-set.md)
+- [Android 16 compatibility gap analysis](docs/android-16-gap-analysis.md)
 - [Device/common/kernel/vendor compatibility audit](docs/compatibility.md)
 - [Baseline capture checklist](docs/baseline.md)
 - [Hardware validation plan](docs/test-plan.md)
