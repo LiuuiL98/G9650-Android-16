@@ -87,15 +87,15 @@ jobs:
             echo
             echo "## Device identity and integration checks"
             echo
-            echo "- PASS: product declares `PRODUCT_DEVICE := star2qltechn`."
-            echo "- PASS: product declares `PRODUCT_MODEL := SM-G9650`."
-            echo "- PASS: device board config selects `lineage_star2qltechn_defconfig`."
-            echo "- PASS: the selected kernel commit contains that defconfig."
-            echo "- PASS: chosen common tree and vendor build filters contain `star2qltechn`."
+            echo '- PASS: product declares `PRODUCT_DEVICE := star2qltechn`.'
+            echo '- PASS: product declares `PRODUCT_MODEL := SM-G9650`.'
+            echo '- PASS: device board config selects `lineage_star2qltechn_defconfig`.'
+            echo '- PASS: the selected kernel commit contains that defconfig.'
+            echo '- PASS: chosen common tree and vendor build filters contain `star2qltechn`.'
             echo
             echo "## Scope limitation"
             echo
-            echo "This validates fetchability, exact revisions, and basic product-tree consistency. It is not a full LineageOS `repo sync`, does not run `lunch`, and does not compile a ROM. The full platform checkout requires a runner with substantially more disk space than the standard GitHub-hosted runner."
+            echo 'This validates fetchability, exact revisions, and basic product-tree consistency. It is not a full LineageOS `repo sync`, does not run `lunch`, and does not compile a ROM. The full platform checkout requires a runner with substantially more disk space than the standard GitHub-hosted runner.'
           } >> "$report"
 
           cat "$report"
